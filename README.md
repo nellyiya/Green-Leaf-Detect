@@ -150,7 +150,6 @@ The model served predictions reliably and efficiently under simulated real-world
 
 ## 📸 Screenshot of Locust Test Results
 
-![Locust Load Test Results](
 
 <img width="1919" height="456" alt="locust" src="https://github.com/user-attachments/assets/51cd4ca8-3ba7-4839-ba98-0fb0680f4280" />
 
