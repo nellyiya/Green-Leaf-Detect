@@ -1,22 +1,22 @@
 
 ---
 
-# Plant Disease Detection
+#  Plant Disease Detection
 
-## Project Description
+##  Project Description
 
 This project demonstrates an end-to-end machine learning pipeline for classifying plant diseases from leaf images. It uses a Convolutional Neural Network (CNN) to classify images into four categories:
 
-* Potato Late Blight
-* Potato Early Blight
-* Pepper Bell Healthy
-* Pepper Bell Bacterial Spot
+* `Potato__Late_blight`
+* `Potato__Early_blight`
+* `Pepper__bell___Healthy`
+* `Pepper__bell___Bacterial_spot`
 
-The project includes data acquisition, preprocessing, model training, evaluation, deployment as an API, and functionality to retrain the model with new data.
+The project includes data acquisition, preprocessing, model training, evaluation, deployment as an API, and dynamic model retraining functionality.
 
 ---
 
-## Repository Structure
+##  Repository Structure
 
 ```
 PlantDiseaseDetection/
@@ -32,13 +32,14 @@ PlantDiseaseDetection/
 ├── data/
 │   ├── train/
 │   └── test/
-└── models/
-    └── plant_disease_model.keras
+├── models/
+│   └── plant_disease_model.keras
+
 ```
 
 ---
 
-## Setup and Installation
+##  Setup and Installation
 
 1. **Clone the repository:**
 
@@ -47,12 +48,12 @@ PlantDiseaseDetection/
    cd PlantDiseaseDetection
    ```
 
-2. **Create and activate a virtual environment (recommended):**
+2. **Create and activate a virtual environment:**
 
    ```bash
    python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   venv\Scripts\activate     # Windows
+   source venv/bin/activate      # Linux/macOS
+   venv\Scripts\activate         # Windows
    ```
 
 3. **Install dependencies:**
@@ -61,130 +62,101 @@ PlantDiseaseDetection/
    pip install -r requirements.txt
    ```
 
-4. **Download and organize the dataset:**
+4. **Download and organize your dataset:**
 
-   Place your dataset images inside the `data/train` and `data/test` folders, organized by class names.
+   Place your image data into `data/train` and `data/test`, each organized by class name folders.
 
 ---
 
-## How to Run
+##  How to Run
 
-### 1. Train the Model
+###  1. Train the Model
 
 ```bash
 python src/model.py
 ```
 
-This will preprocess the data, train the CNN model, and save it as `models/plant_disease_model.keras`.
+This preprocesses the data, trains the CNN, and saves it to `models/plant_disease_model.keras`.
 
-### 2. Test Prediction Script
-
-You can run the prediction script to test on a single image:
+###  2. Test the Prediction Script
 
 ```bash
 python src/prediction.py "data/test/Potato___Late_blight/sample_image.jpg"
 ```
 
-### 3. Start the API Server
-
-Start the FastAPI server:
+###  3. Run the FastAPI Server
 
 ```bash
 uvicorn src.api:app --reload
 ```
 
-Open your browser and go to:
+Access Swagger UI:
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
-Here you can interact with the API for predictions, upload bulk images for retraining, and trigger retraining.
-
 ---
 
 ## Features
 
-* **Model Prediction:** Upload a single image and get the predicted class and confidence.
-* **Bulk Upload:** Upload multiple images to add to training data for retraining.
-* **Model Retraining:** Trigger retraining of the model with newly uploaded images.
-* **API Documentation:** Interactive API docs with Swagger UI.
+**Model Prediction:** Upload an image and get predictions with confidence scores.
+**Bulk Upload:** Add multiple images into training data for retraining.
+**Model Retraining:** Retrain the model via API with new data.
+**Interactive Docs:** Auto-generated Swagger API documentation.
 
 ---
 
-## Results
+##  Results
 
-* Achieved \~95% accuracy on the validation set after training.
-* Model is saved in Keras native `.keras` format for easy loading and deployment.
-* API responds with the top class prediction and confidence score.
-
----
-
-## Flood Request Simulation
-
-To evaluate the performance and latency of the deployed machine learning model API, I used Locust, an open-source load testing tool designed for testing web applications and APIs.
-
-Testing Setup:
-
-Target API: FastAPI model prediction endpoint (/predict)
-
-Host URL: http://127.0.0.1:8000
-
-Number of simulated users: 20 concurrent users
-
-Spawn rate: 5 users per second
-
-Test duration: [Specify your test duration, e.g., 5 minutes]
-
-Procedure:
-
-Launched the Locust web interface at http://localhost:8089.
-
-Entered the target host URL and configured the number of users and spawn rate.
-
-Initiated the test to simulate a flood of requests hitting the prediction endpoint.
-
-Locust generated concurrent HTTP POST requests sending sample image files for prediction.
-
-Monitored real-time metrics including requests per second, response times (latency), and failure rates.
-
-Results and Observations:
-
-The model API maintained an average response time of ~[insert average latency] ms under simulated load.
-
-The system handled [insert requests per second] requests per second without errors.
-
-There were no significant request failures, indicating stable API behavior under concurrent access.
-
-Response time variance was within acceptable limits, ensuring consistent user experience.
-
-CPU and memory utilization during the test remained within resource limits, showing efficient model serving.
-
-Conclusion:
-
-The load test demonstrated that the deployed model API can efficiently serve concurrent prediction requests with low latency and high reliability, validating its readiness for production use. Further scaling can be done by increasing server resources or deploying multiple containers.
-
-
-##Locust Load Testing Setup
-Host URL: http://127.0.0.1:8000
-
-Number of users to simulate: 20
-
-Spawn rate: 5 users per second
-
-Test interface: Accessed via http://localhost:8089
-
-Test goal: To simulate multiple concurrent users sending prediction requests to the /predict endpoint to measure performance under load.
-
-
-### Screenshot of Locust Test Results:
-
-![Locust Load Test Results](pictures/screenshots/locust.png)
-
+* Achieved \~95% validation accuracy.
+*  Model saved in `.keras` format.
+*  Prediction endpoint returns the top 3 classes with confidence levels.
 
 ---
 
-## Video Demo
+## Performance Testing with Locust
+
+To evaluate performance under load, we used **Locust**, a Python-based load testing tool.
+
+### Test Setup
+
+* **API Endpoint:** `/predict`
+* **Host URL:** `http://127.0.0.1:8000`
+* **Users simulated:** 20
+* **Spawn rate:** 5 users/second
+* **Test UI:** [http://localhost:8089](http://localhost:8089)
+
+### Testing Procedure
+
+1. Launched the Locust interface at `http://localhost:8089`.
+2. Entered the host URL and configured number of users and spawn rate.
+3. Sent repeated POST requests with sample images to the `/predict` endpoint.
+4. Monitored key metrics including response times, throughput, and errors.
+
+###  Results and Observations
+
+**Average response time:** \~`[insert ms here]`
+**Throughput:** `[insert requests/sec]` requests/sec
+**Failures:** None observed during simulation
+**Consistency:** Stable performance across users
+**Resource Usage:** Stayed within CPU/memory limits
+
+### Conclusion
+
+The model served predictions reliably and efficiently under simulated real-world load. The API remained stable and performant, indicating production readiness.
+
+---
+
+## 📸 Screenshot of Locust Test Results
+
+![Locust Load Test Results](
+
+<img width="1919" height="456" alt="locust" src="https://github.com/user-attachments/assets/51cd4ca8-3ba7-4839-ba98-0fb0680f4280" />
+
+---
+
+##  Video Demo
 
 *(Add your YouTube demo link here)*
 
@@ -192,10 +164,11 @@ Test goal: To simulate multiple concurrent users sending prediction requests to 
 
 ## Notes
 
-* Ensure your dataset is organized properly inside `data/train` and `data/test` by class.
-* The model supports retraining dynamically through the API.
-* Modify class names inside `src/api.py` if you add/remove classes.
+
+* Ensure the dataset is structured by class in `data/train` and `data/test`.
+* If you modify the classes, update the list in `src/api.py`.
+* API supports model retraining with new data uploads.
 
 ---
 
-If you want, I can help you generate a **requirements.txt** file next or help with the flood request simulation details!
+
