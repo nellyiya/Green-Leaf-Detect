@@ -163,6 +163,9 @@ The model served predictions reliably and efficiently under simulated real-world
 
 *https://youtu.be/SGrBRh-c3ro*
 
+This project is hosted on Render at:
+https://srv-d27gutuuk2gs73e5pq3g.onrender.com
+
 ---
 
 ## Notes
