@@ -36,6 +36,10 @@ PlantDiseaseDetection/
 │   └── plant_disease_model.keras
 
 ```
+## 📸 Screenshot of the Website
+
+![Plant Disease Detection Website](https://github.com/user-attachments/assets/9e08fab6-4e48-4151-b93f-b1c3cd8cfff3)
+ )
 
 ---
 
