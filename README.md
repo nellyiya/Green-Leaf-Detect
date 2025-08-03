@@ -22,8 +22,7 @@ The project includes data acquisition, preprocessing, model training, evaluation
 PlantDiseaseDetection/
 │
 ├── README.md
-├── notebook/
-│   └── plant_disease_detection.ipynb
+├── plant_disease_detection.ipynb  
 ├── src/
 │   ├── preprocessing.py
 │   ├── model.py
