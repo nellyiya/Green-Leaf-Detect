@@ -161,7 +161,7 @@ The model served predictions reliably and efficiently under simulated real-world
 
 ##  Video Demo
 
-*(Add your YouTube demo link here)*
+*https://youtu.be/SGrBRh-c3ro*
 
 ---
 
