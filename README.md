@@ -118,6 +118,20 @@ http://127.0.0.1:8000/docs
 
 ---
 
+##   Model Performance & Evaluation
+  Classification Report
+                                   precision    recall  f1-score   support
+
+Pepper__bell___Bacterial_spot       0.99      1.00      1.00       997
+       Pepper__bell___healthy       0.99      1.00      1.00      1478
+        Potato___Early_blight       0.97      1.00      0.99      1000
+         Potato___Late_blight       1.00      0.91      0.95       433
+
+                     accuracy                           0.99      3908
+                    macro avg       0.99      0.98      0.98      3908
+                 weighted avg       0.99      0.99      0.99      3908
+
+
 ## Performance Testing with Locust
 
 To evaluate performance under load, we used **Locust**, a Python-based load testing tool.
