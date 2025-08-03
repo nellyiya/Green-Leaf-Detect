@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Green Leaf Detect</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo-box">
+        <div class="logo-text">
+          <span>GREENLEAF</span><br>
+          <span>DETECT</span>
+        </div>
+      </div>
+      <nav class="menu">
+        <a href="#" class="active" id="dashboard-link">DASHBOARD</a>
+        <a href="#" id="about-link">ABOUT</a>
+        <a href="#" id="predict-link">PREDICT</a>
+        <a href="#" id="retrain-link">RETRAIN</a>
+        <a href="#" id="blog-link">BLOG</a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Dashboard -->
+      <div class="dashboard-section" id="dashboard-section">
+        <div class="dashboard-cards">
+          <div class="dashboard-card">
+            <h3>📈 Model Uptime</h3>
+            <p id="modelUptime">Loading...</p>
+          </div>
+          <div class="dashboard-card">
+            <h3>📊 Accuracy Graph</h3>
+            <canvas id="dashboardAccuracyChart" width="300" height="150"></canvas>
+          </div>
+          <div class="dashboard-card">
+            <h3>📸 Total Predictions</h3>
+            <p id="totalPredictions">Loading...</p>
+          </div>
+          <div class="dashboard-card">
+            <h3>🧪 Last Retrained Date</h3>
+            <p id="lastRetrained">Loading...</p>
+          </div>
+          <div class="dashboard-card">
+            <h3>🥧 Prediction Distribution</h3>
+            <canvas id="classPieChart" width="300" height="150"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="about-section" id="about-section" style="display: none;">
+        <h2>ABOUT GREENLEAF DETECT</h2>
+        <div class="about-box">
+          <p>We focus on detecting diseases affecting potato and pepper plants, such as late blight, early blight, and bacterial spot in pepper bell.</p>
+        </div>
+      </div>
+
+      <!-- PREDICT -->
+      <div class="predict-section" id="predict-section" style="display: none;">
+        <h2>PREDICT PLANT DISEASE</h2>
+        <div class="model-status">
+          <h3>🟢 Model Status</h3>
+          <p>Uptime: <span id="uptime">Loading...</span></p>
+          <p>Last Trained: <span id="last-trained">Loading...</span></p>
+        </div>
+
+        <div class="predict-box">
+          <label for="imageInput">📷 Choose Image:</label>
+          <input type="file" id="imageInput" accept="image/*" />
+
+          <div id="imagePreviewContainer">
+            <img id="imagePreview" src="" alt="Image Preview" style="display:none;" />
+          </div>
+
+          <button id="predictBtn" disabled>Predict</button>
+
+          <div id="confidenceContainer" style="display:none;">
+            <label>Prediction Confidence:</label>
+            <div>
+              <div id="confidenceBar"></div>
+            </div>
+            <div id="confidencePercent">0%</div>
+            <div id="predictedLabel"></div>
+          </div>
+
+          <button id="saveResultBtn" style="display:none;">Save Prediction Result</button>
+        </div>
+      </div>
+
+      <!-- RETRAIN -->
+      <div class="predict-section" id="retrain-section" style="display: none;">
+        <h2>RETRAIN MODEL</h2>
+        <div class="train-box">
+          <h3>📄 Upload Training Data</h3>
+          <input type="file" id="trainInput" multiple />
+          <button id="uploadTrainBtn">Upload Training Data</button>
+          <button id="retrainBtn">Retrain Model</button>
+        </div>
+      </div>
+
+      <!-- BLOG -->
+      <div class="blog-section" id="blog-section" style="display: none;">
+        <h2>BLOG</h2>
+        <article>
+          <h3>How technology saves crops</h3>
+          <p>Learn about the importance of identifying plant diseases early and how AI can help.</p>
+          <a href="#">Read more</a>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL JAVASCRIPT -->
+  <script>
+    const navLinks = {
+      'dashboard-link': 'dashboard-section',
+      'about-link': 'about-section',
+      'predict-link': 'predict-section',
+      'retrain-link': 'retrain-section',
+      'blog-link': 'blog-section'
+    };
+
+    for (const [linkId, sectionId] of Object.entries(navLinks)) {
+      document.getElementById(linkId).addEventListener('click', (e) => {
+        e.preventDefault();
+        Object.values(navLinks).forEach(id => document.getElementById(id).style.display = 'none');
+        Object.keys(navLinks).forEach(id => document.getElementById(id).classList.remove('active'));
+        document.getElementById(sectionId).style.display = 'block';
+        document.getElementById(linkId).classList.add('active');
+      });
+    }
+
+    let accuracyChart, pieChart;
+
+    async function fetchStatsAndUpdate() {
+      try {
+        const res = await fetch('http://localhost:8000/stats/');
+        const data = await res.json();
+
+        document.getElementById('modelUptime').textContent = data.model_uptime;
+        document.getElementById('uptime').textContent = data.model_uptime;
+        document.getElementById('totalPredictions').textContent = `${data.total_predictions} predictions`;
+        document.getElementById('lastRetrained').textContent = data.last_retrained;
+        document.getElementById('last-trained').textContent = data.last_retrained;
+
+        const ctx = document.getElementById('dashboardAccuracyChart').getContext('2d');
+        if (!accuracyChart) {
+          accuracyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.accuracy_history.map((_, i) => `Epoch ${i+1}`),
+              datasets: [{
+                label: 'Accuracy',
+                data: data.accuracy_history,
+                borderColor: '#00cc99',
+                backgroundColor: 'rgba(0,204,153,0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { labels: { color: 'white' } } },
+              scales: {
+                x: { ticks: { color: 'white' } },
+                y: { ticks: { color: 'white' }, beginAtZero: true }
+              }
+            }
+          });
+        } else {
+          accuracyChart.data.datasets[0].data = data.accuracy_history;
+          accuracyChart.update();
+        }
+      } catch (err) {
+        console.error("Stats fetch error:", err);
+      }
+    }
+
+    async function updateClassDistribution() {
+      try {
+        const res = await fetch('http://localhost:8000/class-distribution/');
+        const data = await res.json();
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+
+        const ctx = document.getElementById('classPieChart').getContext('2d');
+
+        if (!pieChart) {
+          pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Class Distribution',
+                data: values,
+                backgroundColor: ['#00cc99', '#ffcc00', '#ff6666', '#3399ff'],
+                borderColor: '#222',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              plugins: {
+                legend: { labels: { color: 'white' } }
+              }
+            }
+          });
+        } else {
+          pieChart.data.labels = labels;
+          pieChart.data.datasets[0].data = values;
+          pieChart.update();
+        }
+      } catch (err) {
+        console.error("Pie chart load error:", err);
+      }
+    }
+
+    async function updateUptimeLive() {
+      try {
+        const res = await fetch('http://localhost:8000/uptime/');
+        const data = await res.json();
+
+        const isOnline = data.status && data.status.toLowerCase() === 'online';
+
+        const uptimeStr = `${data.days} day${data.days !== 1 ? 's' : ''} ${data.hours} hour${data.hours !== 1 ? 's' : ''}`;
+
+        const uptimeText = isOnline
+          ? `🟢 Online - Uptime: ${uptimeStr}`
+          : `🔴 Offline - Uptime: 0 days 0 hours`;
+
+        const modelUptimeElem = document.getElementById('modelUptime');
+        const uptimeElem = document.getElementById('uptime');
+
+        modelUptimeElem.textContent = uptimeText;
+        uptimeElem.textContent = uptimeText;
+
+        modelUptimeElem.style.color = isOnline ? 'limegreen' : 'red';
+        uptimeElem.style.color = isOnline ? 'limegreen' : 'red';
+
+      } catch (err) {
+        const offlineText = '🔴 Offline - Uptime: 0 days 0 hours';
+        document.getElementById('modelUptime').textContent = offlineText;
+        document.getElementById('uptime').textContent = offlineText;
+        document.getElementById('modelUptime').style.color = 'red';
+        document.getElementById('uptime').style.color = 'red';
+      }
+    }
+
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const confidenceBar = document.getElementById('confidenceBar');
+    const confidencePercent = document.getElementById('confidencePercent');
+    const predictedLabel = document.getElementById('predictedLabel');
+    const predictBtn = document.getElementById('predictBtn');
+    const confidenceContainer = document.getElementById('confidenceContainer');
+    const saveResultBtn = document.getElementById('saveResultBtn');
+    let lastPredictionResult = null;
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+          confidenceContainer.style.display = 'none';
+          confidenceBar.style.width = '0%';
+          confidencePercent.textContent = '0%';
+          predictedLabel.textContent = '';
+          saveResultBtn.style.display = 'none';
+          predictBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    predictBtn.addEventListener('click', async () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+
+      predictBtn.disabled = true;
+      predictBtn.textContent = 'Predicting...';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('http://localhost:8000/predict/', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        const top = result.predictions[0];
+        lastPredictionResult = top;
+
+        confidenceContainer.style.display = 'block';
+        confidenceBar.style.width = `${(top.confidence * 100).toFixed(1)}%`;
+        confidencePercent.textContent = `${(top.confidence * 100).toFixed(1)}%`;
+        predictedLabel.textContent = `Predicted Disease: ${top.class}`;
+        saveResultBtn.style.display = 'inline-block';
+      } catch (err) {
+        alert('Prediction failed');
+      } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = 'Predict';
+      }
+    });
+
+    saveResultBtn.addEventListener('click', () => {
+      if (!lastPredictionResult) return;
+
+      const text = `Prediction Result\nDate: ${new Date().toLocaleString()}\nPredicted Label: ${lastPredictionResult.class}\nConfidence: ${(lastPredictionResult.confidence * 100).toFixed(1)}%\n`;
+
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'prediction_result.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    const trainInput = document.getElementById('trainInput');
+    const uploadTrainBtn = document.getElementById('uploadTrainBtn');
+    const retrainBtn = document.getElementById('retrainBtn');
+
+    uploadTrainBtn.addEventListener('click', async () => {
+      const files = trainInput.files;
+      if (!files.length) return;
+
+      uploadTrainBtn.disabled = true;
+      const formData = new FormData();
+      for (const file of files) formData.append('files', file);
+
+      try {
+        const res = await fetch('http://localhost:8000/upload/', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        alert(data.message);
+      } catch (err) {
+        alert('Upload failed.');
+      } finally {
+        uploadTrainBtn.disabled = false;
+      }
+    });
+
+    retrainBtn.addEventListener('click', async () => {
+      retrainBtn.disabled = true;
+      try {
+        const res = await fetch('http://localhost:8000/retrain/', {
+          method: 'POST'
+        });
+        const data = await res.json();
+        alert(data.message);
+        fetchStatsAndUpdate();
+        updateClassDistribution();
+        updateUptimeLive();
+      } catch (err) {
+        alert('Retrain failed.');
+      } finally {
+        retrainBtn.disabled = false;
+      }
+    });
+
+    // Initial calls
+    updateUptimeLive();
+    fetchStatsAndUpdate();
+    updateClassDistribution();
+    setInterval(fetchStatsAndUpdate, 30000);
+    setInterval(updateClassDistribution, 30000);
+    setInterval(updateUptimeLive, 60000);
+  </script>
+</body>
+</html>
