@@ -115,7 +115,7 @@ http://127.0.0.1:8000/docs
 
 * Achieved \~95% validation accuracy.
 *  Model saved in `.keras` format.
-*  Prediction endpoint returns the top 3 classes with confidence levels.
+*  Prediction endpoint returns the top 4 classes with confidence levels.
 
 ---
 
@@ -140,11 +140,15 @@ To evaluate performance under load, we used **Locust**, a Python-based load test
 
 ###  Results and Observations
 
-**Average response time:** \~`[insert ms here]`
-**Throughput:** `[insert requests/sec]` requests/sec
-**Failures:** None observed during simulation
-**Consistency:** Stable performance across users
-**Resource Usage:** Stayed within CPU/memory limits
+Average Response Time: ~321 ms
+
+Throughput: 8.5 requests/sec
+
+Failures: None observed during simulation
+
+Consistency: Stable performance across users
+
+Resource Usage: Stayed within CPU/memory limits
 
 ### Conclusion
 
